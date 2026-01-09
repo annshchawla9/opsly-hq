@@ -1,4 +1,4 @@
-import { NavLink, useLocation } from 'react-router-dom';
+import { NavLink, useLocation } from "react-router-dom";
 import {
   LayoutDashboard,
   MessageSquare,
@@ -8,84 +8,120 @@ import {
   LogOut,
   Building2,
   Inbox,
-} from 'lucide-react';
-import { cn } from '@/lib/utils';
-import { useAuth } from '@/contexts/AuthContext';
-import { Button } from '@/components/ui/button';
+} from "lucide-react";
+
+import { cn } from "@/lib/utils";
+import { useAuth } from "@/contexts/AuthContext";
+
+import {
+  Sidebar,
+  SidebarContent,
+  SidebarFooter,
+  SidebarHeader,
+  SidebarMenu,
+  SidebarMenuButton,
+  SidebarMenuItem,
+} from "@/components/ui/sidebar";
 
 const navigation = [
-  { name: 'Dashboard', href: '/dashboard', icon: LayoutDashboard },
-  { name: 'Communications', href: '/communications', icon: MessageSquare },
-  { name: 'Inbox', href: '/inbox', icon: Inbox },
-  { name: 'Tasks & Campaigns', href: '/tasks', icon: ClipboardList },
-  { name: 'Performance', href: '/performance', icon: TrendingUp },
-  { name: 'Users & Stores', href: '/management', icon: Users },
+  { name: "Dashboard", href: "/dashboard", icon: LayoutDashboard },
+  { name: "Communications", href: "/communications", icon: MessageSquare },
+  { name: "Inbox", href: "/inbox", icon: Inbox },
+  { name: "Tasks & Campaigns", href: "/tasks", icon: ClipboardList },
+  { name: "Performance", href: "/performance", icon: TrendingUp },
+  { name: "Users & Stores", href: "/management", icon: Users },
 ];
 
 export function AppSidebar() {
   const location = useLocation();
-  const { profile, signOut } = useAuth();
+  const { appUser, user, signOut } = useAuth();
 
   return (
-    <aside className="flex h-screen w-64 flex-col bg-sidebar text-sidebar-foreground">
-      {/* Logo */}
-      <div className="flex h-16 items-center gap-3 px-6 border-b border-sidebar-border">
-        <div className="flex h-9 w-9 items-center justify-center rounded-lg opsly-gradient">
-          <Building2 className="h-5 w-5 text-primary-foreground" />
+    <Sidebar collapsible="icon" variant="sidebar">
+      {/* Header */}
+      <SidebarHeader className="border-b border-sidebar-border">
+        <div className="flex items-center gap-3 px-2 py-2">
+          <div className="flex h-9 w-9 items-center justify-center rounded-lg opsly-gradient">
+            <Building2 className="h-5 w-5 text-primary-foreground" />
+          </div>
+
+          {/* Auto-hides in collapsed mode */}
+          <div className="min-w-0">
+            <h1 className="text-sm font-bold text-sidebar-foreground truncate">
+              Opsly HQ
+            </h1>
+            <p className="text-xs text-sidebar-foreground/60 truncate">
+              Control Center
+            </p>
+          </div>
         </div>
-        <div>
-          <h1 className="text-lg font-bold text-sidebar-foreground">Opsly HQ</h1>
-          <p className="text-xs text-sidebar-foreground/60">Control Center</p>
-        </div>
-      </div>
+      </SidebarHeader>
 
       {/* Navigation */}
-      <nav className="flex-1 space-y-1 px-3 py-4">
-        {navigation.map((item) => {
-          const isActive = location.pathname.startsWith(item.href);
-          return (
-            <NavLink
-              key={item.name}
-              to={item.href}
-              className={cn(
-                'flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-all duration-150',
-                isActive
-                  ? 'bg-sidebar-accent text-sidebar-primary'
-                  : 'text-sidebar-foreground/80 hover:bg-sidebar-accent/50 hover:text-sidebar-foreground'
-              )}
-            >
-              <item.icon className={cn('h-5 w-5', isActive && 'text-sidebar-primary')} />
-              {item.name}
-            </NavLink>
-          );
-        })}
-      </nav>
+      <SidebarContent>
+        <SidebarMenu className="px-2 py-2">
+          {navigation.map((item) => {
+            const isActive = location.pathname.startsWith(item.href);
+            const Icon = item.icon;
 
-      {/* User section */}
-      <div className="border-t border-sidebar-border p-4">
-        <div className="flex items-center gap-3 mb-3">
+            return (
+              <SidebarMenuItem key={item.name}>
+                <SidebarMenuButton
+                  asChild
+                  isActive={isActive}
+                  tooltip={item.name}
+                >
+                  <NavLink
+                    to={item.href}
+                    className={cn(
+                      "flex items-center gap-3",
+                      isActive
+                        ? "text-sidebar-primary"
+                        : "text-sidebar-foreground/80"
+                    )}
+                  >
+                    <Icon className="h-4 w-4" />
+                    <span>{item.name}</span>
+                  </NavLink>
+                </SidebarMenuButton>
+              </SidebarMenuItem>
+            );
+          })}
+        </SidebarMenu>
+      </SidebarContent>
+
+      {/* Footer */}
+      <SidebarFooter className="border-t border-sidebar-border">
+        {/* User mini card */}
+        <div className="flex items-center gap-3 px-2 py-2">
           <div className="flex h-9 w-9 items-center justify-center rounded-full bg-sidebar-accent text-sidebar-primary font-medium">
-            {profile?.full_name?.charAt(0) || 'U'}
+            {appUser?.name?.charAt(0) || "U"}
           </div>
+
           <div className="flex-1 min-w-0">
             <p className="text-sm font-medium text-sidebar-foreground truncate">
-              {profile?.full_name || 'User'}
+              {appUser?.name || "User"}
             </p>
             <p className="text-xs text-sidebar-foreground/60 truncate">
-              {profile?.email || ''}
+              {user?.email || ""}
             </p>
           </div>
         </div>
-        <Button
-          variant="ghost"
-          size="sm"
-          onClick={signOut}
-          className="w-full justify-start gap-2 text-sidebar-foreground/80 hover:text-sidebar-foreground hover:bg-sidebar-accent/50"
-        >
-          <LogOut className="h-4 w-4" />
-          Sign Out
-        </Button>
-      </div>
-    </aside>
+
+        {/* ✅ Sign out as SidebarMenuButton so it collapses properly */}
+        <SidebarMenu className="px-2 pb-2">
+          <SidebarMenuItem>
+            <SidebarMenuButton
+              tooltip="Sign Out"
+              onClick={signOut}
+              className="text-sidebar-foreground/80 hover:text-sidebar-foreground"
+            >
+              <LogOut className="h-4 w-4" />
+              <span>Sign Out</span>
+            </SidebarMenuButton>
+          </SidebarMenuItem>
+        </SidebarMenu>
+      </SidebarFooter>
+    </Sidebar>
   );
 }
